@@ -1,0 +1,271 @@
+﻿@model List<VisitorEntrySystem.Models.VisitorRecord>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f4ff;
+        }
+
+        .navbar {
+            background: white;
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+            .navbar .brand {
+                font-size: 17px;
+                font-weight: 700;
+                color: #1a73e8;
+            }
+
+            .navbar .links {
+                display: flex;
+                align-items: center;
+                gap: 24px;
+            }
+
+            .navbar a {
+                color: #1a73e8;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+                .navbar a:hover {
+                    text-decoration: underline;
+                }
+
+            .navbar .logout {
+                color: #d93025 !important;
+            }
+
+        .container {
+            max-width: 1100px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+            .stat-card .label {
+                font-size: 13px;
+                color: #888;
+                margin-bottom: 6px;
+            }
+
+            .stat-card .value {
+                font-size: 28px;
+                font-weight: 700;
+                color: #1a73e8;
+            }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+            .page-header h2 {
+                font-size: 22px;
+                color: #1a1a2e;
+                font-weight: 700;
+            }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+        }
+
+            .search-bar input {
+                padding: 9px 14px;
+                border: 1.5px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 14px;
+                width: 260px;
+            }
+
+                .search-bar input:focus {
+                    outline: none;
+                    border-color: #1a73e8;
+                }
+
+            .search-bar button {
+                padding: 9px 18px;
+                background: #1a73e8;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .search-bar a {
+                padding: 9px 14px;
+                background: #f1f3f4;
+                color: #555;
+                border-radius: 8px;
+                font-size: 14px;
+                text-decoration: none;
+                font-weight: 500;
+            }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #1a73e8;
+            color: white;
+            padding: 13px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 13px 16px;
+            font-size: 13px;
+            color: #333;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #f8faff;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-in {
+            background: #e6f4ea;
+            color: #1e8e3e;
+        }
+
+        .badge-out {
+            background: #f1f3f4;
+            color: #666;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 48px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <span class="brand">🏢 Visitor Entry System</span>
+        <div class="links">
+            <a href="/Admin/Dashboard">Dashboard</a>
+            <a href="/Admin/ManageUsers">Manage Users</a>
+            <a href="/Visitor/Index">Visitor Entry</a>
+            <a href="/Account/Logout" class="logout">Logout</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="label">Total Visitors</div>
+                <div class="value">@Model.Count</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Currently Inside</div>
+                <div class="value">@Model.Count(v => !v.HasCheckedOut())</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Checked Out</div>
+                <div class="value">@Model.Count(v => v.HasCheckedOut())</div>
+            </div>
+        </div>
+        <div class="page-header">
+            <h2>All Visitor Records</h2>
+            <form method="get" class="search-bar">
+                <input type="text" name="search" value="@ViewBag.Search" placeholder="Search by name..." />
+                <button type="submit">Search</button>
+                <a href="/Admin/Dashboard">Clear</a>
+            </form>
+        </div>
+        <div class="card">
+            @if (Model.Count == 0)
+            {
+                <div class="empty">No records found.</div>
+            }
+            else
+            {
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Contact</th>
+                        <th>Purpose</th>
+                        <th>Host</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                        <th>Registered By</th>
+                        <th>Status</th>
+                    </tr>
+                    @foreach (var v in Model)
+                    {
+                        <tr>
+                            <td><strong>@v.FullName</strong></td>
+                            <td>@v.ContactNumber</td>
+                            <td>@v.Purpose</td>
+                            <td>@v.HostName</td>
+                            <td>@v.CheckInTime.ToString("MMM dd, HH:mm")</td>
+                            <td>@(v.CheckOutTime.HasValue? v.CheckOutTime.Value.ToString("MMM dd, HH:mm") : "—")</td>
+                            <td>@v.RegisteredBy</td>
+                            <td><span class="badge @(v.HasCheckedOut() ? "badge-out" : "badge-in")">@(v.HasCheckedOut() ? "Checked Out" : "Inside")</span></td>
+                        </tr>
+                    }
+                </table>
+            }
+        </div>
+    </div>
+</body>
+</html>

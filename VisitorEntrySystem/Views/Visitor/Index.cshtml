@@ -1,0 +1,244 @@
+﻿@model List<VisitorEntrySystem.Models.VisitorRecord>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Visitor List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f4ff;
+        }
+
+        .navbar {
+            background: white;
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+            .navbar .brand {
+                font-size: 17px;
+                font-weight: 700;
+                color: #1a73e8;
+            }
+
+            .navbar .user {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                font-size: 14px;
+                color: #555;
+            }
+
+            .navbar a {
+                color: #1a73e8;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+                .navbar a:hover {
+                    text-decoration: underline;
+                }
+
+        .container {
+            max-width: 1100px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+            .page-header h2 {
+                font-size: 22px;
+                color: #1a1a2e;
+                font-weight: 700;
+            }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            display: inline-block;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+
+            .btn-primary:hover {
+                background: #1557b0;
+            }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        .btn-edit {
+            background: #e8f0fe;
+            color: #1a73e8;
+        }
+
+        .btn-delete {
+            background: #fce8e6;
+            color: #d93025;
+        }
+
+        .btn-checkout {
+            background: #e6f4ea;
+            color: #1e8e3e;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #1a73e8;
+            color: white;
+            padding: 13px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 13px 16px;
+            font-size: 13px;
+            color: #333;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #f8faff;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-in {
+            background: #e6f4ea;
+            color: #1e8e3e;
+        }
+
+        .badge-out {
+            background: #f1f3f4;
+            color: #666;
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 48px;
+            color: #aaa;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <span class="brand">🏢 Visitor Entry System</span>
+        <div class="user">
+            <span>👤 @Context.Session.GetString("Username")</span>
+            <a href="/Account/Logout">Logout</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="page-header">
+            <h2>Visitor Records</h2>
+            <a href="/Visitor/Create" class="btn btn-primary">+ Register Visitor</a>
+        </div>
+        <div class="card">
+            @if (Model.Count == 0)
+            {
+                <div class="empty">No visitors registered yet.</div>
+            }
+            else
+            {
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Contact</th>
+                        <th>Purpose</th>
+                        <th>Host</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    @foreach (var v in Model)
+                    {
+                        <tr>
+                            <td><strong>@v.FullName</strong></td>
+                            <td>@v.ContactNumber</td>
+                            <td>@v.Purpose</td>
+                            <td>@v.HostName</td>
+                            <td>@v.CheckInTime.ToString("MMM dd, HH:mm")</td>
+                            <td>@(v.CheckOutTime.HasValue? v.CheckOutTime.Value.ToString("MMM dd, HH:mm") : "—")</td>
+                            <td><span class="badge @(v.HasCheckedOut() ? "badge-out" : "badge-in")">@(v.HasCheckedOut() ? "Checked Out" : "Inside")</span></td>
+                            <td>
+                                <div class="actions">
+                                    <a href="/Visitor/Edit/@v.Id" class="btn btn-sm btn-edit">Edit</a>
+                                    @if (Context.Session.GetString("Role") == "Admin")
+                                    {
+                                        <a href="/Visitor/Delete/@v.Id" class="btn btn-sm btn-delete" onclick="return confirm('Delete this visitor?')">Delete</a>
+                                    }
+                                    @if (!v.HasCheckedOut())
+                                    {
+                                        <a href="/Visitor/CheckOut/@v.Id" class="btn btn-sm btn-checkout">Check Out</a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            }
+        </div>
+    </div>
+</body>
+</html>
