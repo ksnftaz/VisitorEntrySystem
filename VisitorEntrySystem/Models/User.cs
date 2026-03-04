@@ -9,8 +9,7 @@
         public string FullName { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
-
+        public int? AdminId { get; set; }
         public bool IsAdmin() => Role == "Admin";
-        public bool IsReceptionist() => Role == "Receptionist";
     }
 }

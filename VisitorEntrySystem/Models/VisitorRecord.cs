@@ -9,15 +9,7 @@
         public DateTime CheckInTime { get; set; }
         public DateTime? CheckOutTime { get; set; }
         public string RegisteredBy { get; set; }
-
-        public override string GetDisplayInfo()
-        {
-            return $"Visitor: {FullName}, Host: {HostName}, Checked In: {CheckInTime}";
-        }
-
-        public bool HasCheckedOut()
-        {
-            return CheckOutTime != null;
-        }
+        public int? AdminId { get; set; }
+        public bool HasCheckedOut() => CheckOutTime != null;
     }
 }

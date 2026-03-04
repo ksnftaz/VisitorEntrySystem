@@ -7,22 +7,16 @@ namespace VisitorEntrySystem.Controllers
     public class VisitorController : Controller
     {
         private readonly AppDbContext _db;
+        public VisitorController(AppDbContext db) { _db = db; }
 
-        public VisitorController(AppDbContext db)
-        {
-            _db = db;
-        }
+        private bool IsLoggedIn() => HttpContext.Session.GetString("Username") != null;
+        private int AdminId() => int.Parse(HttpContext.Session.GetString("UserId"));
 
-        private bool IsLoggedIn()
-        {
-            return HttpContext.Session.GetString("Username") != null;
-        }
-
+        // Show only this admin's visitors
         public IActionResult Index()
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
-            var visitors = _db.Visitors.ToList();
-            return View(visitors);
+            return View(_db.Visitors.Where(v => v.AdminId == AdminId()).ToList());
         }
 
         public IActionResult Create()
@@ -31,14 +25,16 @@ namespace VisitorEntrySystem.Controllers
             return View();
         }
 
+        // Save visitor and link to this admin
         [HttpPost]
-        public IActionResult Create(VisitorRecord visitor)
+        public IActionResult Create(VisitorRecord v)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
-            visitor.CheckInTime = DateTime.Now;
-            visitor.CreatedAt = DateTime.Now;
-            visitor.RegisteredBy = HttpContext.Session.GetString("Username");
-            _db.Visitors.Add(visitor);
+            v.CheckInTime = DateTime.Now;
+            v.CreatedAt = DateTime.Now;
+            v.RegisteredBy = HttpContext.Session.GetString("Username");
+            v.AdminId = AdminId();
+            _db.Visitors.Add(v);
             _db.SaveChanges();
             return RedirectToAction("Index");
         }
@@ -46,16 +42,16 @@ namespace VisitorEntrySystem.Controllers
         public IActionResult Edit(int id)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
-            var visitor = _db.Visitors.Find(id);
-            if (visitor == null) return NotFound();
-            return View(visitor);
+            var v = _db.Visitors.Find(id);
+            if (v == null) return NotFound();
+            return View(v);
         }
 
         [HttpPost]
-        public IActionResult Edit(VisitorRecord visitor)
+        public IActionResult Edit(VisitorRecord v)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
-            _db.Visitors.Update(visitor);
+            _db.Visitors.Update(v);
             _db.SaveChanges();
             return RedirectToAction("Index");
         }
@@ -63,22 +59,16 @@ namespace VisitorEntrySystem.Controllers
         public IActionResult Delete(int id)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
-            var visitor = _db.Visitors.Find(id);
-            if (visitor == null) return NotFound();
-            _db.Visitors.Remove(visitor);
-            _db.SaveChanges();
+            var v = _db.Visitors.Find(id);
+            if (v != null) { _db.Visitors.Remove(v); _db.SaveChanges(); }
             return RedirectToAction("Index");
         }
 
         public IActionResult CheckOut(int id)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
-            var visitor = _db.Visitors.Find(id);
-            if (visitor != null)
-            {
-                visitor.CheckOutTime = DateTime.Now;
-                _db.SaveChanges();
-            }
+            var v = _db.Visitors.Find(id);
+            if (v != null) { v.CheckOutTime = DateTime.Now; _db.SaveChanges(); }
             return RedirectToAction("Index");
         }
     }
